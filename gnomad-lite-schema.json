@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "gnomAD Lite data",
+  "description": "Genes and variants for gnomAD Lite",
+  "type": "object",
+  "properties": {
+    "genes": {
+      "description": "Gene data",
+      "type": "null"
+    },
+    "variants": {
+      "description": "Variant data",
+      "type": "null"
+    }
+  }
+}
