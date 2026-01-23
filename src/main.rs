@@ -1,34 +1,3 @@
-// Fields to keep:
-// Variant:
-//  gnomad ID
-//  Filters (exome/genome)
-//  Flags (exome/genome)
-//  AC (exome/genome)
-//  AN (exome/genome)
-//  AF (exome/genome)
-//
-//  divide by ancestry group:
-//  AC
-//  AN
-//  AF
-//  VEP annotation
-//  LoF curation
-//  Germline classification
-//
-// Variant:
-//  Symbol
-//  Ensembl ID
-//  Region
-//  Flags
-//  Filters
-//  fafmax95
-//  gnomAD variant IDs
-
-// Validation:
-// same deal as https://github.com/dathere/qsv/blob/6b6985065a1270f767d881b13aa2a27fae1958fb/src/cmd/validate.rs#L938
-// parse JSON schema, map IR types to JSON types, off to the races
-
-//use jsonschema::types::JsonType;
 use std::fs::{canonicalize, read_to_string};
 
 pub fn build_validator_from_file_path(
@@ -67,6 +36,18 @@ mod tests {
         genome: Option<SequencingType>,
     }
 
+    #[derive(serde::Serialize)]
+    struct Gene {
+        symbol: String,
+        ensembl_id: String,
+        chrom: String,
+        start: u32,
+        stop: u32,
+        flags: Vec<String>,
+        filters: Vec<String>,
+        variant_ids: Vec<String>,
+    }
+
     factori!(SequencingType, {
         default {
             ac: u32 = 123,
@@ -82,6 +63,19 @@ mod tests {
             id: String = "1-234-A-C".to_string(),
             exome: Option<SequencingType> = None,
             genome: Option<SequencingType> = None
+        }
+    });
+
+    factori!(Gene, {
+        default {
+            symbol: String = "BRCA1".to_string(),
+            ensembl_id: String = "ENSG00000012048".to_string(),
+            chrom: String = "17".to_string(),
+            start: u32 = 43044295,
+            stop: u32 = 43170245,
+            flags: Vec<String> = Vec::new(),
+            filters: Vec<String> = Vec::new(),
+            variant_ids: Vec<String> = Vec::new(),
         }
     });
 
@@ -106,7 +100,8 @@ mod tests {
                         serde_values.push(serde_json::json!({
                             "variants": [
                                 create!(Variant, id: valid_id)
-                            ]
+                            ],
+                            "genes": []
                         }));
                     }
                 }
@@ -120,9 +115,28 @@ mod tests {
             }
         }
         if validation_failures.len() > 0 {
-            //            dbg!("VALIDATION FAILURES: {:?}", &validation_failures);
+            dbg!("VALIDATION FAILURES: {:?}", &validation_failures);
         }
         assert_eq!(validation_failures.len(), 0);
+    }
+
+    #[test]
+    fn ensembl_ids() {
+        let good_document = serde_json::json!({
+            "variants": [
+            ],
+            "genes": [create!(Gene)]
+        });
+
+        let bad_document = serde_json::json!({
+            "variants": [
+            ],
+            "genes": [create!(Gene, ensembl_id: "ENSQ0101010101".to_string())]
+        });
+
+        let validator = build_validator_from_file_path("./gnomad-lite-schema.json").unwrap();
+        assert_eq!(validator.is_valid(&good_document), true);
+        assert_eq!(validator.is_valid(&bad_document), false);
     }
 }
 

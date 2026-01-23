@@ -40,7 +40,6 @@
 
   "properties": {
     "variants": {
-      "description": "Variant data",
       "type": "array",
       "items": {
         "type": "object",
@@ -51,7 +50,77 @@
           },
           "exome": { "$ref": "#/$defs/sequencing_type" },
           "genome": { "$ref": "#/$defs/sequencing_type" }
-        }
+        },
+        "required": ["id", "exome", "genome"]
+      }
+    },
+    "genes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "symbol": { "type": "string" },
+          "ensembl_id": { "type": "string", "pattern": "^ENSG" },
+          "chrom": {
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "X",
+              "Y",
+              "M"
+            ]
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "stop": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "flags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "filters": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "variant_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": [
+          "symbol",
+          "ensembl_id",
+          "chrom",
+          "start",
+          "stop",
+          "flags",
+          "filters",
+          "variant_ids"
+        ]
       }
     }
   }
