@@ -52,13 +52,36 @@ mod tests {
     use factori::*;
 
     #[derive(serde::Serialize)]
+    struct SequencingType {
+        ac: u32,
+        an: u32,
+        af: f64,
+        flags: Vec<String>,
+        filters: Vec<String>,
+    }
+
+    #[derive(serde::Serialize)]
     struct Variant {
         id: String,
+        exome: Option<SequencingType>,
+        genome: Option<SequencingType>,
     }
+
+    factori!(SequencingType, {
+        default {
+            ac: u32 = 123,
+            an: u32 = 456,
+            af: f64 = 0.2697,
+            flags: Vec<String> = Vec::new(),
+            filters: Vec<String> = Vec::new()
+        }
+    });
 
     factori!(Variant, {
         default {
             id: String = "1-234-A-C".to_string(),
+            exome: Option<SequencingType> = None,
+            genome: Option<SequencingType> = None
         }
     });
 
@@ -90,13 +113,14 @@ mod tests {
             }
         }
         for serde_value in &serde_values {
+            dbg!("{:?}", serde_value);
             let validation_result = validator.validate(serde_value);
             if let Err(validation_error) = validation_result {
                 validation_failures.push(validation_error);
             }
         }
         if validation_failures.len() > 0 {
-            dbg!("VALIDATION FAILURES: {:?}", &validation_failures);
+            //            dbg!("VALIDATION FAILURES: {:?}", &validation_failures);
         }
         assert_eq!(validation_failures.len(), 0);
     }
